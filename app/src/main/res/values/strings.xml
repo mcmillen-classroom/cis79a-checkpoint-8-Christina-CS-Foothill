@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">My Places</string>
+    <string name="main_menu_create">Add New Place</string>
+    <string name="description_label">Description:</string>
+    <string name="name_label">Name:</string>
+    <string name="create">Create</string>
+    <string name="place_create_title">Create New Place</string>
 </resources>
