@@ -6,18 +6,21 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private static final int REQUEST_PLACE_CREATE = 1;
+    private static final int REQUEST_PLACE_EDIT = 2;
 
     private ListView mlistView;
     private ArrayAdapter<Place> mArrayAdapter;
@@ -39,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
         mArrayAdapter = new PlaceArrayAdapter(this,myPlaces);
 
         mlistView.setAdapter(mArrayAdapter);
+        mlistView.setOnItemClickListener(this);
+        mlistView.setOnCreateContextMenuListener(this);
     }
 
     @Override
@@ -52,6 +57,22 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+
+        if(resultCode == RESULT_OK && requestCode == REQUEST_PLACE_EDIT){
+            String name = data.getStringExtra("place_name");
+            String description = data.getStringExtra("place_description");
+            int position = data.getIntExtra("place_position",-1);
+
+            if(position != -1){
+                Place place = mArrayAdapter.getItem(position);
+                place.setmName(name);
+                place.setmDescription(description);
+                //tells the arrayAdapter that the arraylist has been updated/changed
+                mArrayAdapter.notifyDataSetChanged();
+            }
+
+        }
+
     }
 
     @Override
@@ -72,10 +93,51 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+
+        super.onCreateContextMenu(menu,v,menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.context_menu,menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        //need to use this to get the position of the item
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+
+        if(item.getItemId() == R.id.context_menu_edit){
+           Place place = mArrayAdapter.getItem(info.position);
+           launchEditActivity(place,info.position);
+           return true;
+        }
+        else if(item.getItemId() == R.id.context_menu_delete){
+            Place place = mArrayAdapter.getItem(info.position);
+            mArrayAdapter.remove(place);
+
+        }
+
+        return false;
+    }
+
     private void launchCreateActivity(){
 
         Intent createIntent = new Intent(this, PlaceCreateActivity.class);
         startActivityForResult(createIntent, REQUEST_PLACE_CREATE);
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+        Place place = mArrayAdapter.getItem(position);
+        launchEditActivity(place, position);
+    }
+
+    private void launchEditActivity(Place place, int position) {
+        Intent editIntent = new Intent(this, PlaceEditActivity.class);
+        editIntent.putExtra("place_position",position);
+        editIntent.putExtra("place_name", place.getmName());
+        editIntent.putExtra("place_description",place.getmDescription());
+        startActivityForResult(editIntent, REQUEST_PLACE_EDIT);
+
+    }
 }
