@@ -8,4 +8,7 @@
     <string name="save">Save</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="inhabitant_name_label">Inhabitant Name:</string>
+    <string name="inhabitant_description_label">Inhabitant Description</string>
+    <string name="add_inhabitant">Add An Inhabitant</string>
 </resources>

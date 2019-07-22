@@ -15,26 +15,37 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private static final int REQUEST_PLACE_CREATE = 1;
     private static final int REQUEST_PLACE_EDIT = 3;
+    public static final String PLACE_ID = "place_id";
+    public static final String PLACE_NAME = "place_name";
 
     private ListView mlistView;
     private ArrayAdapter<Place> mArrayAdapter;
     private ArrayList<Place> myPlaces = new ArrayList<Place>();
+
+    DatabaseReference dataBasePlaces;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        dataBasePlaces = FirebaseDatabase.getInstance().getReference("places");
         mlistView = (ListView) findViewById(R.id.list_view);
 
 
-        myPlaces.add(new Place("Laney College","Near Lake Merritt"));
+       myPlaces.add(new Place("Laney College","Near Lake Merritt"));
         myPlaces.add(new Place("Berkeley City College","Near UC Berkeley"));
         myPlaces.add(new Place("College of Alameda","On Alameda Island"));
         myPlaces.add(new Place("Merritt College","Near Skyline"));
@@ -44,6 +55,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mlistView.setAdapter(mArrayAdapter);
         mlistView.setOnItemClickListener(this);
         mlistView.setOnCreateContextMenuListener(this);
+
+        dataBasePlaces.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot placesSnapShot: dataSnapshot.getChildren()){
+                    Place place = placesSnapShot.getValue(Place.class);
+                    mArrayAdapter.add(place);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                //executed if there is an error
+                System.out.println("failed");
+
+            }
+        });
     }
 
     @Override
@@ -51,15 +80,38 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         if(resultCode == RESULT_OK && requestCode == REQUEST_PLACE_CREATE){
             if(data != null){
-                String name = data.getStringExtra("place_name");
+                String name = data.getStringExtra(PLACE_NAME);
                 String description = data.getStringExtra("place_description");
-                mArrayAdapter.add(new Place(name, description));
+                String id = dataBasePlaces.push().getKey();
+                Place newPlace = new Place(name,description,id);
+                dataBasePlaces.child(id).setValue(newPlace);
 
+                dataBasePlaces.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        myPlaces = new ArrayList<Place>();
+                        for(DataSnapshot placesSnapShot: dataSnapshot.getChildren()){
+                            Place place = placesSnapShot.getValue(Place.class);
+
+                            mArrayAdapter.add(place);
+
+                        }
+
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        //executed if there is an error
+                        System.out.println("failed");
+
+                    }
+                });
             }
         }
 
         if(resultCode == RESULT_OK && requestCode == REQUEST_PLACE_EDIT){
-            String name = data.getStringExtra("place_name");
+            String name = data.getStringExtra(PLACE_NAME);
             String description = data.getStringExtra("place_description");
             int position = data.getIntExtra("place_position",-1);
 
@@ -74,6 +126,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
 
     }
+
+
+
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -116,6 +171,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             mArrayAdapter.remove(place);
 
         }
+        else if(item.getItemId() == R.id.add_inhabitant){
+            Place place = mArrayAdapter.getItem(info.position);
+            launchAddInhabitantActivity(place);
+        }
 
         return false;
     }
@@ -135,9 +194,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private void launchEditActivity(Place place, int position) {
         Intent editIntent = new Intent(this, PlaceEditActivity.class);
         editIntent.putExtra("place_position",position);
-        editIntent.putExtra("place_name", place.getmName());
+        editIntent.putExtra(PLACE_NAME, place.getmName());
         editIntent.putExtra("place_description",place.getmDescription());
         startActivityForResult(editIntent, REQUEST_PLACE_EDIT);
+
+    }
+
+    private void launchAddInhabitantActivity(Place place){
+
+        Intent inhabitantIntent = new Intent(this, PlaceInhabitantActivity.class);
+
+        inhabitantIntent.putExtra(PLACE_ID, place.getmPlaceId());
+        inhabitantIntent.putExtra(PLACE_NAME,place.getmName());
+
+        startActivity(inhabitantIntent);
 
     }
 }

@@ -5,9 +5,31 @@ public class Place {
     private String mName;
     private String mDescription;
 
+    String mPlaceId;
+
+    public Place(){
+
+    }
+
     public Place(String mName, String mDescription) {
         this.mName = mName;
         this.mDescription = mDescription;
+        mPlaceId = "";
+    }
+
+    public Place(String mName, String mDescription, String mPlaceId) {
+        this.mName = mName;
+        this.mDescription = mDescription;
+        this.mPlaceId = mPlaceId;
+    }
+
+
+    public String getmPlaceId() {
+        return mPlaceId;
+    }
+
+    public void setmPlaceId(String mPlaceId) {
+        this.mPlaceId = mPlaceId;
     }
 
     public String getmName() {
@@ -24,5 +46,14 @@ public class Place {
 
     public void setmDescription(String mDescription) {
         this.mDescription = mDescription;
+    }
+
+    @Override
+    public String toString() {
+        return "Place{" +
+                "mName='" + mName + '\'' +
+                ", mDescription='" + mDescription + '\'' +
+                ", mPlaceId='" + mPlaceId + '\'' +
+                '}';
     }
 }

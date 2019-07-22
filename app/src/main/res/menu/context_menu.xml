@@ -9,4 +9,8 @@
     <item
         android:id="@+id/context_menu_delete"
         android:title="@string/delete"/>
+
+    <item
+        android:id="@+id/add_inhabitant"
+        android:title="@string/add_inhabitant"/>
 </menu>
