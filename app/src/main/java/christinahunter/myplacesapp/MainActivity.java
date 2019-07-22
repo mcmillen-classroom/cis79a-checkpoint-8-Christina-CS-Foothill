@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private static final int REQUEST_PLACE_CREATE = 1;
-    private static final int REQUEST_PLACE_EDIT = 2;
+    private static final int REQUEST_PLACE_EDIT = 3;
 
     private ListView mlistView;
     private ArrayAdapter<Place> mArrayAdapter;
