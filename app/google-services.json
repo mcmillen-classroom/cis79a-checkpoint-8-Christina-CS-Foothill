@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "145405099065",
+    "firebase_url": "https://cis79a-checkpoint-8-rtdatabase.firebaseio.com",
+    "project_id": "cis79a-checkpoint-8-rtdatabase",
+    "storage_bucket": "cis79a-checkpoint-8-rtdatabase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:145405099065:android:6a2e87ef5ec92d27",
+        "android_client_info": {
+          "package_name": "christinahunter.myplacesapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "145405099065-mvgspe1vpis3jo1bd7op49u803lr6bnr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "christinahunter.myplacesapp",
+            "certificate_hash": "42cfb834c39f5cd6f0bc4dc5a25af5d0832b77fe"
+          }
+        },
+        {
+          "client_id": "145405099065-rt31a8a56makg9fjuan4m2l5mutp2cdj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZU_E2bp0T-jdOZsV0UBaVQmegIVfiyj0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "145405099065-rt31a8a56makg9fjuan4m2l5mutp2cdj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
