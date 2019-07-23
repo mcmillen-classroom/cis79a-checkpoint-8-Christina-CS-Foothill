@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -45,10 +46,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mlistView = (ListView) findViewById(R.id.list_view);
 
 
-       myPlaces.add(new Place("Laney College","Near Lake Merritt"));
-        myPlaces.add(new Place("Berkeley City College","Near UC Berkeley"));
-        myPlaces.add(new Place("College of Alameda","On Alameda Island"));
-        myPlaces.add(new Place("Merritt College","Near Skyline"));
+//        myPlaces.add(new Place("Laney College","Near Lake Merritt"));
+//        myPlaces.add(new Place("Berkeley City College","Near UC Berkeley"));
+//        myPlaces.add(new Place("College of Alameda","On Alameda Island"));
+//        myPlaces.add(new Place("Merritt College","Near Skyline"));
 
         mArrayAdapter = new PlaceArrayAdapter(this,myPlaces);
 
@@ -56,23 +57,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mlistView.setOnItemClickListener(this);
         mlistView.setOnCreateContextMenuListener(this);
 
-        dataBasePlaces.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for(DataSnapshot placesSnapShot: dataSnapshot.getChildren()){
-                    Place place = placesSnapShot.getValue(Place.class);
-                    mArrayAdapter.add(place);
-                }
 
-            }
+    }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                //executed if there is an error
-                System.out.println("failed");
+    @Override
+    protected void onStart() {
+        super.onStart();
+        populateArrayAdapter();
 
-            }
-        });
     }
 
     @Override
@@ -85,28 +77,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 String id = dataBasePlaces.push().getKey();
                 Place newPlace = new Place(name,description,id);
                 dataBasePlaces.child(id).setValue(newPlace);
+                populateArrayAdapter();
 
-                dataBasePlaces.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        myPlaces = new ArrayList<Place>();
-                        for(DataSnapshot placesSnapShot: dataSnapshot.getChildren()){
-                            Place place = placesSnapShot.getValue(Place.class);
-
-                            mArrayAdapter.add(place);
-
-                        }
-
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        //executed if there is an error
-                        System.out.println("failed");
-
-                    }
-                });
             }
         }
 
@@ -114,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             String name = data.getStringExtra(PLACE_NAME);
             String description = data.getStringExtra("place_description");
             int position = data.getIntExtra("place_position",-1);
+            String id = data.getStringExtra("place_id");
 
             if(position != -1){
                 Place place = mArrayAdapter.getItem(position);
@@ -121,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 place.setmDescription(description);
                 //tells the arrayAdapter that the arraylist has been updated/changed
                 mArrayAdapter.notifyDataSetChanged();
+                editPlace(name,description,id);
             }
 
         }
@@ -168,7 +142,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
         else if(item.getItemId() == R.id.context_menu_delete){
             Place place = mArrayAdapter.getItem(info.position);
-            mArrayAdapter.remove(place);
+            deletePlace(place.getmPlaceId());
+
 
         }
         else if(item.getItemId() == R.id.add_inhabitant){
@@ -196,8 +171,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         editIntent.putExtra("place_position",position);
         editIntent.putExtra(PLACE_NAME, place.getmName());
         editIntent.putExtra("place_description",place.getmDescription());
+        editIntent.putExtra("place_id", place.getmPlaceId());
         startActivityForResult(editIntent, REQUEST_PLACE_EDIT);
-
     }
 
     private void launchAddInhabitantActivity(Place place){
@@ -209,5 +184,49 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         startActivity(inhabitantIntent);
 
+    }
+
+    private boolean editPlace(String name, String description, String id){
+        //allows you to update objects in the Firebase database
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("places").child(id);
+        Place place = new Place(name,description,id);
+        databaseReference.setValue(place);
+        Toast.makeText(this,"Place Edited", Toast.LENGTH_SHORT).show();
+        return true;
+
+    }
+
+    //delete an object from firebase
+    private void deletePlace(String placeId){
+        DatabaseReference drPlace = FirebaseDatabase.getInstance().getReference("places").child(placeId);
+        DatabaseReference drInhabitant = FirebaseDatabase.getInstance().getReference("inhabitants").child(placeId);
+
+        drPlace.removeValue();
+        drInhabitant.removeValue();
+
+        Toast.makeText(this, "artist deleted", Toast.LENGTH_SHORT).show();
+
+    }
+
+    public void populateArrayAdapter(){
+        dataBasePlaces.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                myPlaces.clear();
+                for(DataSnapshot placesSnapShot: dataSnapshot.getChildren()){
+                    Place place = placesSnapShot.getValue(Place.class);
+
+                    mArrayAdapter.add(place);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                //executed if there is an error
+                System.out.println("failed");
+
+            }
+        });
     }
 }

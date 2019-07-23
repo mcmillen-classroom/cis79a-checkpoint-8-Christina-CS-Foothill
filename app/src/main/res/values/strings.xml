@@ -11,4 +11,5 @@
     <string name="inhabitant_name_label">Inhabitant Name:</string>
     <string name="inhabitant_description_label">Inhabitant Description</string>
     <string name="add_inhabitant">Add An Inhabitant</string>
+    <string name="place_edit_title">Edit Place</string>
 </resources>
